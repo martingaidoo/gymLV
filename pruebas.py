@@ -9,11 +9,12 @@ import tkinter as tk
 import pygame
 import sqlite3
 from tkcalendar import Calendar
+from tkinter import ttk
 
 customtkinter.set_appearance_mode("system")
 customtkinter.set_default_color_theme("blue")
 #import de utilerias de sqlite
-from database_utils import agregar_cliente,registrarPago
+from database_utils import *
 
 conn = sqlite3.connect('BaseDatos.db') #vinculo la base de datos
 
@@ -42,6 +43,7 @@ class VentanaPrincipal(tk.Tk):
         self.frame_registrarCliente = customtkinter.CTkFrame(self)
         self.frame_actualizarClientes = customtkinter.CTkFrame(self)
         self.frame_actualizarPrecio = customtkinter.CTkFrame(self)
+        self.frame_asistencia = customtkinter.CTkFrame(self)
 
 # Llenar el menú
         frame = customtkinter.CTkFrame(self.frame_menu, width=320, height=360, corner_radius=15)
@@ -84,6 +86,39 @@ class VentanaPrincipal(tk.Tk):
         button_consultarCliente = customtkinter.CTkButton(self.frame_clientes, width=220, text="CONSULTAR CLIENTE", command=lambda: cambiarVentana(clientes, ventana_RegistrarCliente), corner_radius=6)
         button_consultarCliente.place(x=50, y=220)
 
+#llenar asistencia
+        frame = customtkinter.CTkFrame(master=self.frame_asistencia, width=320, height=360, corner_radius=15, border_width=12, border_color="black")
+        frame.pack(pady=10)
+        imagen = ctk.CTkImage(light_image=PIL.Image.open("./assets/volver.png"),
+                                dark_image=PIL.Image.open("./assets/volver.png"),
+                                size=(30, 30))
+        boton_con_imagen = ctk.CTkButton(self.frame_asistencia, image=imagen,text="Volver", command=lambda:(self.frame_menu.pack(),self.frame_asistencia.pack_forget()))
+        boton_con_imagen.place(relx=0.03, rely=0.03)
+        entry = customtkinter.CTkEntry(master=self.frame_asistencia,
+                                    width=120,
+                                    height=25,
+                                    corner_radius=10)
+        entry.place(relx=0.3, rely=0.3)
+        button = customtkinter.CTkButton(self.frame_asistencia, width=220, text="confirmar", command=lambda: (enter(entry.get(), datos_nombre)), corner_radius=6)
+        button.place(x=50, y=220)
+
+        datos_nombre = ctk.CTkLabel(master=self.frame_asistencia, text="", font=('Century Gothic', 15))
+        datos_nombre.place(relx=0.2, rely=0.7)
+    
+        def enter(documento,datos_nombre):
+            mostrarCliente(obtener_datos_cliente(documento),datos_nombre)
+        
+        #para poder apretar enter y ejecutar el button
+            
+        self.frame_asistencia.bind('<Return>', enter)
+
+        def mostrarCliente(datos, label):
+            print(datos)
+            id_cliente, nombre,apellido, documento, correo, fecha_nacimiento, telefono, id_cuota, deuda, plan, profesor, fecha, vencimiento, id_cliente2 = datos
+            datos_nombre.configure(text=f"Nombre: {nombre}\nApellido: {apellido}\nVencimiento: {vencimiento}\nPlan:{plan}")
+            registrarAsistencia(id_cliente)
+
+
 #Llenar pagos
         frame = customtkinter.CTkFrame(master=self.frame_pagos, width=320, height=360, corner_radius=15, border_width=12, border_color="black")
         frame.pack(pady=10)
@@ -105,7 +140,7 @@ class VentanaPrincipal(tk.Tk):
         button_actualizarCliente = customtkinter.CTkButton(self.frame_pagos, width=220, text="ACTUALIZAR PLANES", command=lambda: (self.frame_pagos.pack_forget(),self.frame_actualizarPrecio.pack()), corner_radius=6)
         button_actualizarCliente.place(x=50, y=165)
 
-        button_consultarCliente = customtkinter.CTkButton(self.frame_pagos, width=220, text="ASISTENCIAS", command=lambda: cambiarVentana(clientes, ventana_RegistrarCliente), corner_radius=6)
+        button_consultarCliente = customtkinter.CTkButton(self.frame_pagos, width=220, text="ASISTENCIAS", command=lambda: (self.frame_asistencia.pack(), self.frame_pagos.pack_forget()), corner_radius=6)
         button_consultarCliente.place(x=50, y=220)
 
 # llenar pagoCuota
@@ -124,15 +159,31 @@ class VentanaPrincipal(tk.Tk):
         label_titulo.place(relx=0.36, rely=0.1)
 
         #Entradas
-        label_cliente = customtkinter.CTkLabel(master=frame, text="Cliente", font=('Century Gothic',15))
+        label_cliente = customtkinter.CTkLabel(master=frame, text="documento", font=('Century Gothic',15))
         label_cliente.place(relx=0.45, rely=0.2)
         entry_cliente = customtkinter.CTkEntry(master=frame, width=220, height=25, corner_radius=10)
         entry_cliente.place(relx=0.5, rely=0.26, anchor=tk.CENTER)
 
         label_programa = customtkinter.CTkLabel(master=frame, text="Programa", font=('Century Gothic',15))
         label_programa.place(relx=0.44, rely=0.3)
-        entry_programa = customtkinter.CTkEntry(master=frame, width=220, height=25, corner_radius=10)
-        entry_programa.place(relx=0.5, rely=0.36, anchor=tk.CENTER)
+
+        conexion = sqlite3.connect('BaseDatos.db')
+        cursor = conexion.cursor()
+
+        menu_desplegable = ttk.Combobox(master=frame, width=35, height=25)
+
+        # Obtener los nombres de los clientes desde la base de datos
+        cursor.execute("SELECT Nombre FROM Programa")
+        nombres = cursor.fetchall()
+
+        # Agregar los nombres al menú desplegable
+        menu_desplegable['values'] = nombres
+
+        #nombre_seleccionado = menu_desplegable.get()
+
+        # Mostrar el menú desplegable
+        menu_desplegable.place(relx=0.3, rely=0.35)
+
 
         label_pago = customtkinter.CTkLabel(master=frame, text="Pago $", font=('Century Gothic',15))
         label_pago.place(relx=0.44, rely=0.4)
@@ -143,23 +194,13 @@ class VentanaPrincipal(tk.Tk):
         label_profesor.place(relx=0.44, rely=0.5)
         entry_profesor = customtkinter.CTkEntry(master=frame, width=220, height=25, corner_radius=10)
         entry_profesor.place(relx=0.5, rely=0.56, anchor=tk.CENTER)
-        
-        label_fecha= customtkinter.CTkLabel(master=frame, text="Fecha", font=('Century Gothic',15)) 
-        label_fecha.place(relx=0.45, rely=0.6)
-        frameCalendario = customtkinter.CTkFrame(master=frame, width=300, height=300)
-        frameCalendario.place(relx=0.5, rely=0.75, anchor=tk.CENTER)
-        
-        # Crear un objeto Calendar
-        cal = Calendar(frameCalendario, selectmode="day", year=2023, month=10, day=23)
 
-        # Colocar los widgets en la ventana
-        cal.pack(pady=10)
         
         button_confirmar = customtkinter.CTkButton(
             master=frame,
             width=220,
             text="Confirmar",
-            command=lambda: (registrarPago([entry_cliente.get(), entry_pago.get(), entry_programa.get(), entry_profesor.get(), cal.get_date()])),                
+            command=lambda: (registrarPago([entry_cliente.get(), entry_pago.get(), menu_desplegable.get()[1:len(menu_desplegable.get())-1], entry_profesor.get()]), self.frame_pagos.pack(),self.frame_pagoCuota.pack_forget()),                
             corner_radius=6
         )
         button_confirmar.place(relx=0.33, rely=0.9)
@@ -229,7 +270,6 @@ class VentanaPrincipal(tk.Tk):
         class ProgramaABM_Clientes:
             def __init__(self, frame):
                 self.frame = frame
-                
 
                 # Conectarse a la base de datos SQLite
                 self.conexion = sqlite3.connect("BaseDatos.db")
