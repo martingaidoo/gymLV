@@ -287,13 +287,13 @@ class VentanaPrincipal(tk.Tk):
                 self.Apellido_entry = ctk.CTkEntry(frame)
                 self.Apellido_entry.grid(row=1, column=3)
 
-                self.label_Documento = ctk.CTkLabel(frame, text="Documento:")
-                self.label_Documento.grid(row=2, column=0)
+                self.label_Documento = ctk.CTkLabel(frame, text="Correo:")
+                self.label_Documento.grid(row=2, column=0)  #tienen mal el nombre de las entradas hay que arreglarlo@@@@@@@@@@@@@@@@@@@@@@@@@@
                 self.Documento_entry = ctk.CTkEntry(frame)
                 self.Documento_entry.grid(row=2, column=1)
 
-                self.label_Correo = ctk.CTkLabel(frame, text="Correo:")
-                self.label_Correo.grid(row=2, column=2)
+                self.label_Correo = ctk.CTkLabel(frame, text="Documento:")
+                self.label_Correo.grid(row=2, column=2) #tienen mal el nombre de las entradas hay que arreglarlo@@@@@@@@@@@@@@@@@@@@@@@@@@@@
                 self.Correo_entry = ctk.CTkEntry(frame)
                 self.Correo_entry.grid(row=2, column=3)
 
@@ -306,9 +306,6 @@ class VentanaPrincipal(tk.Tk):
                 self.label_Telefono.grid(row=3, column=2)
                 self.Telefono_entry = ctk.CTkEntry(frame)
                 self.Telefono_entry.grid(row=3, column=3)
-
-
-
 
                 # Crear botones
                 self.btn_agregar = ctk.CTkButton(frame, text="Agregar", command=self.agregar)
