@@ -146,10 +146,9 @@ def registrarPago(data):
             cursor.execute("UPDATE Cuotas SET Haber = ?, PLAN = ?, PROFESOR = ?,  id_programa = ? WHERE id_cliente = ?",
                         (Haber, Plan, Profesor, id_programa, id_cliente))
             conexion.commit()
-
-        mensaje = f"Registro de Cobro:\n\nNombre: {datos_cliente[1]}\nApellido: {datos_cliente[2]}\nDocumento: {documento}\nCobro: {cobro}\nProfesor: {Profesor}\nFecha: {actual}"
+        mensaje = f"Registro de Cobro:\n\nNombre: {datos_cliente[2]}\nApellido: {datos_cliente[1]}\nDocumento: {documento}\nCobro: {cobro}\nProfesor: {Profesor}\nFecha: {actual}"
         messagebox.showinfo("Cobro Registrado", mensaje)
-
+        
         registrarCobro(id_cliente, cobro, Profesor)
 
 """ en esta funcion registrara un cliente nuevo

@@ -12,24 +12,31 @@ from tkcalendar import Calendar
 from tkinter import ttk
 from tkinter import messagebox
 import keyboard
+from datetime import datetime
+from database_utils import *
 
+import os
+import sys
 
 customtkinter.set_appearance_mode("system")
 customtkinter.set_default_color_theme("blue")
+
+fecha_actual = datetime.now()
+actual = fecha_actual.strftime("%d/%m/%Y")
+
 #import de utilerias de sqlite
-from database_utils import *
+
 
 conn = sqlite3.connect('BaseDatos.db') #vinculo la base de datos
 
 cursor = conn.cursor() # este es mi curson que me permite realizar consultar y modificaciona a la bd
-import tkinter as tk
-from PIL import Image, ImageTk
-import customtkinter
 
+#se usa en la pantalla de consultar cuotas o clientes
+banderaVencimiento = False
 class VentanaPrincipal(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title('SALUD INTEGRAL')
+        self.title('COLUMBUS')
         self.iconbitmap("./assets/logo.ico")
         self.state('zoomed')        
 
@@ -48,13 +55,14 @@ class VentanaPrincipal(tk.Tk):
         self.frame_actualizarPrecio = customtkinter.CTkFrame(self)
         self.frame_asistencia = customtkinter.CTkFrame(self)
         self.frame_consultarCuotas = customtkinter.CTkFrame(self)
+        self.frame_consultarCuotasVencidas = customtkinter.CTkFrame(self)
 
 # Llenar el menú
         
         frame = customtkinter.CTkFrame(master = self.frame_menu, width=300, height=300, corner_radius=15)
         frame.pack(pady=0)
 
-        l2 = customtkinter.CTkLabel(self.frame_menu, text="Bienvenido", font=('Century Gothic', 20))
+        l2 = customtkinter.CTkLabel(frame, text="Bienvenido", font=('Century Gothic', 20))
         l2.place(relx=0.35, rely=0.1)
 
         # Botones
@@ -79,7 +87,7 @@ class VentanaPrincipal(tk.Tk):
         boton_con_imagen.place(relx=0.03, rely=0.03)
 
         # Mensaje
-        msjPrincipal = customtkinter.CTkLabel(self.frame_clientes, text="Mis Clientes", font=('Century Gothic', 20))
+        msjPrincipal = customtkinter.CTkLabel(frame, text="Mis Clientes", font=('Century Gothic', 20))
         msjPrincipal.place(x=100, y=70)
         
         button_registrarCliente = customtkinter.CTkButton(self.frame_clientes, width=220, text="REGISTRAR NUEVO CLIENTE", command=lambda: (self.frame_clientes.pack_forget(),self.frame_registrarCliente.pack()), corner_radius=6)
@@ -102,9 +110,9 @@ class VentanaPrincipal(tk.Tk):
         boton_con_imagen = ctk.CTkButton(self.frame_asistencia, image=imagen,text="Volver", command=lambda:(self.frame_pagos.pack(pady=60),self.frame_asistencia.pack_forget()))
         boton_con_imagen.place(relx=0.03, rely=0.03)
 
-        label_titulo = customtkinter.CTkLabel(self.frame_asistencia, text="ASISTENCIA", font=('Century Gothic',20))
+        label_titulo = customtkinter.CTkLabel(frame, text="ASISTENCIA", font=('Century Gothic',20))
         label_titulo.place(relx=0.3, rely=0.2)
-        label_titulo = customtkinter.CTkLabel(self.frame_asistencia, text="Documente:", font=('Century Gothic',15))
+        label_titulo = customtkinter.CTkLabel(frame, text="Documente:", font=('Century Gothic',15))
         label_titulo.place(relx=0.3, rely=0.4)
         
         entry_asistencia = customtkinter.CTkEntry(self.frame_asistencia,
@@ -133,7 +141,7 @@ class VentanaPrincipal(tk.Tk):
         boton_con_imagen.place(relx=0.03, rely=0.03)
 
         # Mensaje
-        msjPrincipal = customtkinter.CTkLabel(self.frame_pagos, text="PAGOS", font=('Century Gothic', 20))
+        msjPrincipal = customtkinter.CTkLabel(frame, text="PAGOS", font=('Century Gothic', 20))
         msjPrincipal.place(x=130, y=70)
 
         button_registrarCliente = customtkinter.CTkButton(self.frame_pagos, width=220, text="PAGO DE CUOTA", command=lambda: (self.frame_pagos.pack_forget(),self.frame_pagoCuota.pack(pady=70)), corner_radius=6)
@@ -203,9 +211,7 @@ class VentanaPrincipal(tk.Tk):
             master=frame,
             width=220,
             text="Confirmar",
-            command=lambda: (registrarPago([entry_cliente.get(), entry_pago.get(), menu_desplegable.get()[1:len(menu_desplegable.get())-1], entry_profesor.get()]), self.frame_pagos.pack(pady=60),self.frame_pagoCuota.pack_forget()),                
-            corner_radius=6
-        )
+            command=lambda: (registrarPago([entry_cliente.get(), entry_pago.get(), menu_desplegable.get()[1:len(menu_desplegable.get())-1], entry_profesor.get()]), self.frame_pagos.pack(pady=60),self.frame_pagoCuota.pack_forget()),corner_radius=6)
         button_confirmar.place(relx=0.25, rely=0.9)
 
 # Llenar al registrar clientes
@@ -218,36 +224,36 @@ class VentanaPrincipal(tk.Tk):
         boton_con_imagen = ctk.CTkButton(self.frame_registrarCliente, image=imagen,text="Volver", command=lambda:(self.frame_clientes.pack(pady=60),self.frame_registrarCliente.pack_forget()))
         boton_con_imagen.place(relx=0.03, rely=0.03)
         #LABEL TITULO
-        label_titulo = customtkinter.CTkLabel(self.frame_registrarCliente, text="Registrar clientes", font=('Century Gothic',20))
+        label_titulo = customtkinter.CTkLabel(frame, text="Registrar clientes", font=('Century Gothic',20))
         label_titulo.place(relx=0.26, rely=0.03)
 
         #Entradas
-        label_nombre = customtkinter.CTkLabel(self.frame_registrarCliente, text="Nombre", font=('Century Gothic',15))
+        label_nombre = customtkinter.CTkLabel(frame, text="Nombre", font=('Century Gothic',15))
         label_nombre.place(relx=0.32, rely=0.1)
         entry_nombre = customtkinter.CTkEntry(self.frame_registrarCliente, width=120, height=25, corner_radius=10)
         entry_nombre.place(relx=0.5, rely=0.16, anchor=tk.CENTER)
 
-        label_apellido = customtkinter.CTkLabel(self.frame_registrarCliente, text="Apellido", font=('Century Gothic',15))
+        label_apellido = customtkinter.CTkLabel(frame, text="Apellido", font=('Century Gothic',15))
         label_apellido.place(relx=0.32, rely=0.2)
         entry_apellido = customtkinter.CTkEntry(self.frame_registrarCliente, width=120, height=25, corner_radius=10)
         entry_apellido.place(relx=0.5, rely=0.26, anchor=tk.CENTER)
 
-        label_documento = customtkinter.CTkLabel(self.frame_registrarCliente, text="Documento", font=('Century Gothic',15))
+        label_documento = customtkinter.CTkLabel(frame, text="Documento", font=('Century Gothic',15))
         label_documento.place(relx=0.32, rely=0.3)
         entry_documento = customtkinter.CTkEntry(self.frame_registrarCliente, width=120, height=25, corner_radius=10)
         entry_documento.place(relx=0.5, rely=0.36, anchor=tk.CENTER)
 
-        label_correo = customtkinter.CTkLabel(self.frame_registrarCliente, text="Correo", font=('Century Gothic',15))
+        label_correo = customtkinter.CTkLabel(frame, text="Correo", font=('Century Gothic',15))
         label_correo.place(relx=0.32, rely=0.4)
         entry_correo = customtkinter.CTkEntry(self.frame_registrarCliente, width=120, height=25, corner_radius=10)
         entry_correo.place(relx=0.5, rely=0.46, anchor=tk.CENTER)
 
-        label_telefono = customtkinter.CTkLabel(self.frame_registrarCliente, text="Telefono", font=('Century Gothic',15))
+        label_telefono = customtkinter.CTkLabel(frame, text="Telefono", font=('Century Gothic',15))
         label_telefono.place(relx=0.32, rely=0.5)
         entry_telefono = customtkinter.CTkEntry(self.frame_registrarCliente, width=120, height=25, corner_radius=10)
         entry_telefono.place(relx=0.5, rely=0.56, anchor=tk.CENTER)
 
-        label_fechaNacimiento = customtkinter.CTkLabel(master=self.frame_registrarCliente, text="Fecha de nacimiento", font=('Century Gothic',15)) # se ingresa ejemplo "año-mes-dia"
+        label_fechaNacimiento = customtkinter.CTkLabel(frame, text="Fecha de nacimiento", font=('Century Gothic',15)) # se ingresa ejemplo "año-mes-dia"
         label_fechaNacimiento.place(relx=0.32, rely=0.58)
 
         frameCalendario = customtkinter.CTkFrame(master=self.frame_registrarCliente, width=300, height=300)
@@ -264,10 +270,10 @@ class VentanaPrincipal(tk.Tk):
             master=self.frame_registrarCliente,
             width=220,
             text="Confirmar",
-            command=lambda: (agregar_cliente([entry_nombre.get(),entry_apellido.get(), entry_correo.get(), entry_documento.get(), cal.get_date(), entry_telefono.get()]),self.frame_clientes.pack(pady=60),self.frame_registrarCliente.pack_forget()),
+            command=lambda: (agregar_cliente([entry_nombre.get(),entry_apellido.get(), entry_correo.get(), entry_documento.get(), cal.get_date(), entry_telefono.get()]),self.frame_pagoCuota.pack(pady=60),self.frame_registrarCliente.pack_forget()),
             corner_radius=6
         )
-        button_confirmar.place(relx=0.18, rely=0.90)
+        button_confirmar.place(relx=0.35, rely=0.90)
 
 
 #llenar consultar clientes##############################################
@@ -279,7 +285,7 @@ class VentanaPrincipal(tk.Tk):
                 self.conexion = sqlite3.connect("BaseDatos.db")
                 self.cursor = self.conexion.cursor()
                 self.conexion.commit()
-
+        
                 # Crear etiquetas y campos de entrada
                 self.label_nombre = ctk.CTkLabel(frame, text="Nombre:")
                 self.label_nombre.grid(row=1, column=0)
@@ -315,26 +321,47 @@ class VentanaPrincipal(tk.Tk):
                 self.btn_actualizar = ctk.CTkButton(frame, text="Actualizar", command=self.actualizar)
                 self.btn_actualizar.grid(row=4, column=2)
 
+                self.btn_vencido = ctk.CTkButton(frame, text="Vencido", command=lambda: (self.mostrar_programas(), cambiar()))
+                self.btn_vencido.grid(row=4, column=1)
+
                 # Crear una lista para mostrar los datos de la base de datos
                 self.lista_programas = tk.Listbox(frame)
                 self.lista_programas.grid(row=5, column=0, columnspan=4, sticky=tk.W + tk.E + tk.N + tk.S)
+
                 self.mostrar_programas()
+     
 
                 # Asignar una función para manejar la selección en la lista
                 self.lista_programas.bind('<<ListboxSelect>>', self.seleccionar_programa)
 
+                def cambiar():
+                    global banderaVencimiento
+                    banderaVencimiento = not (banderaVencimiento)
+
             def mostrar_programas(self):
                 self.lista_programas.delete(0, ctk.END)
-                
                 cuotas = self.cursor.execute('SELECT * FROM Cuotas').fetchall()
+                global banderaVencimiento
+                if banderaVencimiento == False:
+                    for cuota in cuotas:
+                        id_cliente, haber, plan, profe, fecha, vencimiento, id_cliente2, id_programa = cuota  # Obtener los dos últimos elementos de la tupla
+                        consulta = """SELECT * FROM Clientes WHERE id = ?;"""
+                        cursor.execute(consulta, (id_cliente,)) 
+                        cliente = cursor.fetchone()  
+                        _, nombre, apellido, correo, documento, fechaNacimiento, telefono = cliente
+                        self.lista_programas.insert(ctk.END, (apellido, nombre, haber, plan, fecha, vencimiento))
+                if banderaVencimiento == True:
+                    for cuota in cuotas:
+                        fecha_actual = datetime.strptime(actual, "%d/%m/%Y")
+                        fecha_vencimiento = datetime.strptime(cuota[5], "%d/%m/%Y")
+                        if fecha_actual >= fecha_vencimiento:
+                            id_cliente, haber, plan, profe, fecha, vencimiento, id_cliente2, id_programa = cuota  # Obtener los dos últimos elementos de la tupla
+                            consulta = """SELECT * FROM Clientes WHERE id = ?;"""
+                            cursor.execute(consulta, (id_cliente,)) 
+                            cliente = cursor.fetchone()  
+                            _, nombre, apellido, correo, documento, fechaNacimiento, telefono = cliente
+                            self.lista_programas.insert(ctk.END, (apellido, nombre, haber, plan, fecha, vencimiento)) 
 
-                for cuota in cuotas:
-                    id_cliente, haber, plan, profe, fecha, vencimiento, id_cliente2, id_programa = cuota  # Obtener los dos últimos elementos de la tupla
-                    consulta = """SELECT * FROM Clientes WHERE id = ?;"""
-                    cursor.execute(consulta, (id_cliente,)) 
-                    cliente = cursor.fetchone()  
-                    _, nombre, apellido, correo, documento, fechaNacimiento, telefono = cliente
-                    self.lista_programas.insert(ctk.END, (apellido, nombre, haber, plan, fecha, vencimiento))
 
             def actualizar(self):
                 apellido = self.Apellido_entry.get()
@@ -420,15 +447,15 @@ class VentanaPrincipal(tk.Tk):
                 self.Apellido_entry = ctk.CTkEntry(frame)
                 self.Apellido_entry.grid(row=1, column=3)
 
-                self.label_Documento = ctk.CTkLabel(frame, text="Correo:")
-                self.label_Documento.grid(row=2, column=0)  #tienen mal el nombre de las entradas hay que arreglarlo@@@@@@@@@@@@@@@@@@@@@@@@@@
-                self.Documento_entry = ctk.CTkEntry(frame)
-                self.Documento_entry.grid(row=2, column=1)
-
-                self.label_Correo = ctk.CTkLabel(frame, text="Documento:")
-                self.label_Correo.grid(row=2, column=2) #tienen mal el nombre de las entradas hay que arreglarlo@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+                self.label_Correo = ctk.CTkLabel(frame, text="Correo:")
+                self.label_Correo.grid(row=2, column=0)  #tienen mal el nombre de las entradas hay que arreglarlo@@@@@@@@@@@@@@@@@@@@@@@@@@
                 self.Correo_entry = ctk.CTkEntry(frame)
-                self.Correo_entry.grid(row=2, column=3)
+                self.Correo_entry.grid(row=2, column=1)
+
+                self.label_Documento= ctk.CTkLabel(frame, text="Documento:")
+                self.label_Documento.grid(row=2, column=2) #tienen mal el nombre de las entradas hay que arreglarlo@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+                self.Documento_entry = ctk.CTkEntry(frame)
+                self.Documento_entry.grid(row=2, column=3)
 
                 self.label_FechaNacimiento = ctk.CTkLabel(frame, text="Fecha de nacimiento:")
                 self.label_FechaNacimiento.grid(row=3, column=0)
@@ -459,7 +486,7 @@ class VentanaPrincipal(tk.Tk):
                 programas = self.cursor.execute('SELECT * FROM Clientes').fetchall()
                 for programa in programas:
                     _, nombre, apellido, correo, documento, fechaNacimiento, telefono = programa  # Obtener los dos últimos elementos de la tupla
-                    self.lista_programas.insert(ctk.END, (apellido, nombre, correo, documento, fechaNacimiento, telefono))
+                    self.lista_programas.insert(ctk.END, (apellido, nombre, documento, correo, fechaNacimiento, telefono))
 
             def actualizar(self):
                 apellido = self.Apellido_entry.get()
@@ -608,7 +635,12 @@ class VentanaPrincipal(tk.Tk):
 
         ProgramaABM(frame)
 
+        def recargar(event):
+            self.destroy()
+            python = sys.executable
+            os.execl(python, python, *sys.argv)
 
+        self.bind("<F5>", recargar)
         # Mostrar el primer menú al inicio
         self.frame_menu.pack(pady=70)
 
