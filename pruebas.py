@@ -1,7 +1,7 @@
 from tkinter import PhotoImage
 import customtkinter
 import customtkinter as ctk
-from customtkinter import CTk, CTkFrame, CTkButton
+from customtkinter import CTk, CTkFrame, CTkButton, CTkEntry
 import PIL.Image
 from PIL import ImageTk,Image
 from tkinter import *
@@ -10,6 +10,9 @@ import pygame
 import sqlite3
 from tkcalendar import Calendar
 from tkinter import ttk
+from tkinter import messagebox
+import keyboard
+
 
 customtkinter.set_appearance_mode("system")
 customtkinter.set_default_color_theme("blue")
@@ -44,128 +47,128 @@ class VentanaPrincipal(tk.Tk):
         self.frame_actualizarClientes = customtkinter.CTkFrame(self)
         self.frame_actualizarPrecio = customtkinter.CTkFrame(self)
         self.frame_asistencia = customtkinter.CTkFrame(self)
+        self.frame_consultarCuotas = customtkinter.CTkFrame(self)
 
 # Llenar el menú
-        frame = customtkinter.CTkFrame(self.frame_menu, width=320, height=360, corner_radius=15)
-        frame.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
+        
+        frame = customtkinter.CTkFrame(master = self.frame_menu, width=300, height=300, corner_radius=15)
+        frame.pack(pady=0)
 
         l2 = customtkinter.CTkLabel(self.frame_menu, text="Bienvenido", font=('Century Gothic', 20))
-        l2.pack(pady=10)
+        l2.place(relx=0.35, rely=0.1)
 
         # Botones
-        button_Clientes = customtkinter.CTkButton(master=self.frame_menu, width=220, text="Clientes", command=lambda:(self.frame_clientes.pack(),self.frame_menu.pack_forget()), corner_radius=6)
-        button_Clientes.pack(pady=10)
+        button_Clientes = customtkinter.CTkButton(self.frame_menu, width=220, text="Clientes", command=lambda:(self.frame_clientes.pack(pady=60),self.frame_menu.pack_forget()), corner_radius=6)
+        button_Clientes.place(relx=0.15, rely=0.3)
 
-        button_pagoCuota = customtkinter.CTkButton(master=self.frame_menu, width=220, text="Pagos", command=lambda:(self.frame_pagos.pack(),self.frame_menu.pack_forget()), corner_radius=6)
-        button_pagoCuota.pack(pady=10)
+        button_pagoCuota = customtkinter.CTkButton(self.frame_menu, width=220, text="Pagos", command=lambda:(self.frame_pagos.pack(pady=60),self.frame_menu.pack_forget()), corner_radius=6)
+        button_pagoCuota.place(relx=0.15, rely=0.5)
 
-        button_cerrar = customtkinter.CTkButton(master=self.frame_menu, width=100, height=20, text="Cerrar", command=self.destroy, compound="left", fg_color='white', text_color='black', hover_color='#AFAFAF')
-        button_cerrar.pack(pady=10)
+        button_cerrar = customtkinter.CTkButton(self.frame_menu, width=100, height=20, text="Cerrar", command=self.destroy, compound="left", fg_color='white', text_color='black', hover_color='#AFAFAF')
+        button_cerrar.place(relx=0.34, rely=0.7)
 
 # Llenar clientes
-        frame = customtkinter.CTkFrame(master=self.frame_clientes, width=320, height=360, corner_radius=15, border_width=12, border_color="black")
-        frame.pack(pady=10)
+        frame = customtkinter.CTkFrame(master=self.frame_clientes, width=320, height=360, corner_radius=15)
+        frame.pack(pady=0)
 
     # Cargar una imagen para volver atras
         imagen = ctk.CTkImage(light_image=PIL.Image.open("./assets/volver.png"),
                                 dark_image=PIL.Image.open("./assets/volver.png"),
                                 size=(30, 30))
-        boton_con_imagen = ctk.CTkButton(self.frame_clientes, image=imagen,text="Volver", command=lambda:(self.frame_menu.pack(),self.frame_clientes.pack_forget()))
+        boton_con_imagen = ctk.CTkButton(self.frame_clientes, image=imagen,text="Volver", command=lambda:(self.frame_menu.pack(pady=70),self.frame_clientes.pack_forget()))
         boton_con_imagen.place(relx=0.03, rely=0.03)
 
         # Mensaje
         msjPrincipal = customtkinter.CTkLabel(self.frame_clientes, text="Mis Clientes", font=('Century Gothic', 20))
-        msjPrincipal.place(x=50, y=45)
-
+        msjPrincipal.place(x=100, y=70)
+        
         button_registrarCliente = customtkinter.CTkButton(self.frame_clientes, width=220, text="REGISTRAR NUEVO CLIENTE", command=lambda: (self.frame_clientes.pack_forget(),self.frame_registrarCliente.pack()), corner_radius=6)
         button_registrarCliente.place(x=50, y=110)
 
-        button_actualizarCliente = customtkinter.CTkButton(self.frame_clientes, width=220, text="ACTUALIZAR CLIENTE", command=lambda: (self.frame_clientes.pack_forget(),self.frame_actualizarClientes.pack()), corner_radius=6)
+        button_actualizarCliente = customtkinter.CTkButton(self.frame_clientes, width=220, text="ACTUALIZAR CLIENTE", command=lambda: (self.frame_clientes.pack_forget(),self.frame_actualizarClientes.pack(pady=60)), corner_radius=6)
         button_actualizarCliente.place(x=50, y=165)
 
-        button_consultarCliente = customtkinter.CTkButton(self.frame_clientes, width=220, text="CONSULTAR CLIENTE", command=lambda: cambiarVentana(clientes, ventana_RegistrarCliente), corner_radius=6)
+        button_consultarCliente = customtkinter.CTkButton(self.frame_clientes, width=220, text="CONSULTAR CUOTAS", command=lambda: (self.frame_consultarCuotas.pack(pady=60),self.frame_clientes.pack_forget()), corner_radius=6)
         button_consultarCliente.place(x=50, y=220)
 
+        
+
 #llenar asistencia
-        frame = customtkinter.CTkFrame(master=self.frame_asistencia, width=320, height=360, corner_radius=15, border_width=12, border_color="black")
-        frame.pack(pady=10)
+        frame = customtkinter.CTkFrame(self.frame_asistencia, width=320, height=360)
+        frame.pack(pady=0)
         imagen = ctk.CTkImage(light_image=PIL.Image.open("./assets/volver.png"),
                                 dark_image=PIL.Image.open("./assets/volver.png"),
                                 size=(30, 30))
-        boton_con_imagen = ctk.CTkButton(self.frame_asistencia, image=imagen,text="Volver", command=lambda:(self.frame_menu.pack(),self.frame_asistencia.pack_forget()))
+        boton_con_imagen = ctk.CTkButton(self.frame_asistencia, image=imagen,text="Volver", command=lambda:(self.frame_pagos.pack(pady=60),self.frame_asistencia.pack_forget()))
         boton_con_imagen.place(relx=0.03, rely=0.03)
-        entry = customtkinter.CTkEntry(master=self.frame_asistencia,
+
+        label_titulo = customtkinter.CTkLabel(self.frame_asistencia, text="ASISTENCIA", font=('Century Gothic',20))
+        label_titulo.place(relx=0.3, rely=0.2)
+        label_titulo = customtkinter.CTkLabel(self.frame_asistencia, text="Documente:", font=('Century Gothic',15))
+        label_titulo.place(relx=0.3, rely=0.4)
+        
+        entry_asistencia = customtkinter.CTkEntry(self.frame_asistencia,
                                     width=120,
                                     height=25,
                                     corner_radius=10)
-        entry.place(relx=0.3, rely=0.3)
-        button = customtkinter.CTkButton(self.frame_asistencia, width=220, text="confirmar", command=lambda: (enter(entry.get(), datos_nombre)), corner_radius=6)
+        entry_asistencia.place(relx=0.3, rely=0.5)
+        button = customtkinter.CTkButton(self.frame_asistencia, width=220, text="confirmar", command=lambda: (registrarAsistencia(obtener_datos_cliente(entry_asistencia.get())),entry_asistencia.delete(0, tk.END)), corner_radius=6)
         button.place(x=50, y=220)
-
-        datos_nombre = ctk.CTkLabel(master=self.frame_asistencia, text="", font=('Century Gothic', 15))
-        datos_nombre.place(relx=0.2, rely=0.7)
-    
-        def enter(documento,datos_nombre):
-            mostrarCliente(obtener_datos_cliente(documento),datos_nombre)
-        
-        #para poder apretar enter y ejecutar el button
-            
-        self.frame_asistencia.bind('<Return>', enter)
-
-        def mostrarCliente(datos, label):
-            print(datos)
-            id_cliente, nombre,apellido, documento, correo, fecha_nacimiento, telefono, id_cuota, deuda, plan, profesor, fecha, vencimiento, id_cliente2 = datos
-            datos_nombre.configure(text=f"Nombre: {nombre}\nApellido: {apellido}\nVencimiento: {vencimiento}\nPlan:{plan}")
-            registrarAsistencia(id_cliente)
-
+        #hace lo mismo que apretar el boton
+        def funcion_al_presionar_tecla(event):
+            if entry_asistencia.get() != "":
+                registrarAsistencia(obtener_datos_cliente(entry_asistencia.get())),entry_asistencia.delete(0, tk.END)
+        #ejecuta la funcion de arriba con apretar el enter
+        self.bind("<Return>", funcion_al_presionar_tecla)
 
 #Llenar pagos
-        frame = customtkinter.CTkFrame(master=self.frame_pagos, width=320, height=360, corner_radius=15, border_width=12, border_color="black")
-        frame.pack(pady=10)
+        frame = customtkinter.CTkFrame(master=self.frame_pagos, width=320, height=360, corner_radius=15)
+        frame.pack(pady=0)
 
     # Cargar una imagen para volver atras
         imagen = ctk.CTkImage(light_image=PIL.Image.open("./assets/volver.png"),
                                 dark_image=PIL.Image.open("./assets/volver.png"),
                                 size=(30, 30))
-        boton_con_imagen = ctk.CTkButton(self.frame_pagos, image=imagen,text="Volver", command=lambda:(self.frame_menu.pack(),self.frame_pagos.pack_forget()))
+        boton_con_imagen = ctk.CTkButton(self.frame_pagos, image=imagen,text="Volver", command=lambda:(self.frame_menu.pack(pady=70),self.frame_pagos.pack_forget()))
         boton_con_imagen.place(relx=0.03, rely=0.03)
 
         # Mensaje
         msjPrincipal = customtkinter.CTkLabel(self.frame_pagos, text="PAGOS", font=('Century Gothic', 20))
-        msjPrincipal.place(x=50, y=45)
+        msjPrincipal.place(x=130, y=70)
 
-        button_registrarCliente = customtkinter.CTkButton(self.frame_pagos, width=220, text="PAGO DE CUOTA", command=lambda: (self.frame_pagos.pack_forget(),self.frame_pagoCuota.pack()), corner_radius=6)
+        button_registrarCliente = customtkinter.CTkButton(self.frame_pagos, width=220, text="PAGO DE CUOTA", command=lambda: (self.frame_pagos.pack_forget(),self.frame_pagoCuota.pack(pady=70)), corner_radius=6)
         button_registrarCliente.place(x=50, y=110)
 
-        button_actualizarCliente = customtkinter.CTkButton(self.frame_pagos, width=220, text="ACTUALIZAR PLANES", command=lambda: (self.frame_pagos.pack_forget(),self.frame_actualizarPrecio.pack()), corner_radius=6)
+        button_actualizarCliente = customtkinter.CTkButton(self.frame_pagos, width=220, text="ACTUALIZAR PLANES", command=lambda: (self.frame_pagos.pack_forget(),self.frame_actualizarPrecio.pack(pady=70)), corner_radius=6)
         button_actualizarCliente.place(x=50, y=165)
 
-        button_consultarCliente = customtkinter.CTkButton(self.frame_pagos, width=220, text="ASISTENCIAS", command=lambda: (self.frame_asistencia.pack(), self.frame_pagos.pack_forget()), corner_radius=6)
+        button_consultarCliente = customtkinter.CTkButton(self.frame_pagos, width=220, text="ASISTENCIAS", command=lambda: (self.frame_asistencia.pack(pady=70), self.frame_pagos.pack_forget()), corner_radius=6)
         button_consultarCliente.place(x=50, y=220)
 
 # llenar pagoCuota
-        frame = customtkinter.CTkFrame(self.frame_pagoCuota, width=600, height=700, corner_radius=15)
-        frame.pack(pady=10)
+        frame = customtkinter.CTkFrame(self.frame_pagoCuota, width=400, height=600, corner_radius=15)
+        frame.pack(pady=0)
 
     # Cargar una imagen para volver atras
         imagen = ctk.CTkImage(light_image=PIL.Image.open("./assets/volver.png"),
                                 dark_image=PIL.Image.open("./assets/volver.png"),
                                 size=(30, 30))
-        boton_con_imagen = ctk.CTkButton(self.frame_pagoCuota, image=imagen,text="Volver", command=lambda:(self.frame_pagos.pack(),self.frame_pagoCuota.pack_forget()))
+        boton_con_imagen = ctk.CTkButton(self.frame_pagoCuota, image=imagen,text="Volver", command=lambda:(self.frame_pagos.pack(pady=60),self.frame_pagoCuota.pack_forget()))
         boton_con_imagen.place(relx=0.03, rely=0.03)
 
     #LABEL TITULO
         label_titulo = customtkinter.CTkLabel(master=frame, text="PAGO DE CUOTA", font=('Century Gothic',20))
-        label_titulo.place(relx=0.36, rely=0.1)
+        label_titulo.place(relx=0.34, rely=0.1)
 
         #Entradas
         label_cliente = customtkinter.CTkLabel(master=frame, text="documento", font=('Century Gothic',15))
-        label_cliente.place(relx=0.45, rely=0.2)
+        label_cliente.place(relx=0.40, rely=0.2)
+
         entry_cliente = customtkinter.CTkEntry(master=frame, width=220, height=25, corner_radius=10)
         entry_cliente.place(relx=0.5, rely=0.26, anchor=tk.CENTER)
 
         label_programa = customtkinter.CTkLabel(master=frame, text="Programa", font=('Century Gothic',15))
-        label_programa.place(relx=0.44, rely=0.3)
+        label_programa.place(relx=0.44, rely=0.35)
 
         conexion = sqlite3.connect('BaseDatos.db')
         cursor = conexion.cursor()
@@ -182,37 +185,37 @@ class VentanaPrincipal(tk.Tk):
         #nombre_seleccionado = menu_desplegable.get()
 
         # Mostrar el menú desplegable
-        menu_desplegable.place(relx=0.3, rely=0.35)
+        menu_desplegable.place(relx=0.23, rely=0.4)
 
 
         label_pago = customtkinter.CTkLabel(master=frame, text="Pago $", font=('Century Gothic',15))
-        label_pago.place(relx=0.44, rely=0.4)
+        label_pago.place(relx=0.44, rely=0.5)
         entry_pago = customtkinter.CTkEntry(master=frame, width=120, height=25, corner_radius=10)
-        entry_pago.place(relx=0.5, rely=0.46, anchor=tk.CENTER)
+        entry_pago.place(relx=0.5, rely=0.56, anchor=tk.CENTER)
 
         label_profesor = customtkinter.CTkLabel(master=frame, text="Profesor", font=('Century Gothic',15))
-        label_profesor.place(relx=0.44, rely=0.5)
+        label_profesor.place(relx=0.44, rely=0.64)
         entry_profesor = customtkinter.CTkEntry(master=frame, width=220, height=25, corner_radius=10)
-        entry_profesor.place(relx=0.5, rely=0.56, anchor=tk.CENTER)
+        entry_profesor.place(relx=0.5, rely=0.7, anchor=tk.CENTER)
 
         
         button_confirmar = customtkinter.CTkButton(
             master=frame,
             width=220,
             text="Confirmar",
-            command=lambda: (registrarPago([entry_cliente.get(), entry_pago.get(), menu_desplegable.get()[1:len(menu_desplegable.get())-1], entry_profesor.get()]), self.frame_pagos.pack(),self.frame_pagoCuota.pack_forget()),                
+            command=lambda: (registrarPago([entry_cliente.get(), entry_pago.get(), menu_desplegable.get()[1:len(menu_desplegable.get())-1], entry_profesor.get()]), self.frame_pagos.pack(pady=60),self.frame_pagoCuota.pack_forget()),                
             corner_radius=6
         )
-        button_confirmar.place(relx=0.33, rely=0.9)
+        button_confirmar.place(relx=0.25, rely=0.9)
 
 # Llenar al registrar clientes
-        frame = customtkinter.CTkFrame(master=self.frame_registrarCliente, width=800, height=800, corner_radius=15, border_color="black",border_width=12)
-        frame.pack(pady=10)
+        frame = customtkinter.CTkFrame(master=self.frame_registrarCliente, width=800, height=800)
+        frame.pack(pady=0)
     # Cargar una imagen para volver atras
         imagen = ctk.CTkImage(light_image=PIL.Image.open("./assets/volver.png"),
                                 dark_image=PIL.Image.open("./assets/volver.png"),
                                 size=(30, 30))
-        boton_con_imagen = ctk.CTkButton(self.frame_registrarCliente, image=imagen,text="Volver", command=lambda:(self.frame_clientes.pack(),self.frame_registrarCliente.pack_forget()))
+        boton_con_imagen = ctk.CTkButton(self.frame_registrarCliente, image=imagen,text="Volver", command=lambda:(self.frame_clientes.pack(pady=60),self.frame_registrarCliente.pack_forget()))
         boton_con_imagen.place(relx=0.03, rely=0.03)
         #LABEL TITULO
         label_titulo = customtkinter.CTkLabel(self.frame_registrarCliente, text="Registrar clientes", font=('Century Gothic',20))
@@ -261,10 +264,140 @@ class VentanaPrincipal(tk.Tk):
             master=self.frame_registrarCliente,
             width=220,
             text="Confirmar",
-            command=lambda: (agregar_cliente([entry_nombre.get(),entry_apellido.get(), entry_correo.get(), entry_documento.get(), cal.get_date(), entry_telefono.get()]),self.frame_clientes.pack(),self.frame_registrarCliente.pack_forget()),
+            command=lambda: (agregar_cliente([entry_nombre.get(),entry_apellido.get(), entry_correo.get(), entry_documento.get(), cal.get_date(), entry_telefono.get()]),self.frame_clientes.pack(pady=60),self.frame_registrarCliente.pack_forget()),
             corner_radius=6
         )
         button_confirmar.place(relx=0.18, rely=0.90)
+
+
+#llenar consultar clientes##############################################
+        class ProgramaABM_cuotas:
+            def __init__(self, frame):
+                self.frame = frame
+
+                # Conectarse a la base de datos SQLite
+                self.conexion = sqlite3.connect("BaseDatos.db")
+                self.cursor = self.conexion.cursor()
+                self.conexion.commit()
+
+                # Crear etiquetas y campos de entrada
+                self.label_nombre = ctk.CTkLabel(frame, text="Nombre:")
+                self.label_nombre.grid(row=1, column=0)
+                self.nombre_entry = ctk.CTkEntry(frame)
+                self.nombre_entry.grid(row=1, column=1)
+
+                self.label_Apellido = ctk.CTkLabel(frame, text="Apellido:")
+                self.label_Apellido.grid(row=1, column=2)
+                self.Apellido_entry = ctk.CTkEntry(frame)
+                self.Apellido_entry.grid(row=1, column=3)
+
+                self.label_Deuda = ctk.CTkLabel(frame, text="Deuda:")
+                self.label_Deuda.grid(row=2, column=0)  #tienen mal el nombre de las entradas hay que arreglarlo@@@@@@@@@@@@@@@@@@@@@@@@@@
+                self.Deuda_entry = ctk.CTkEntry(frame)
+                self.Deuda_entry.grid(row=2, column=1)
+
+                self.label_Plan = ctk.CTkLabel(frame, text="Plan:")
+                self.label_Plan.grid(row=2, column=2) #tienen mal el nombre de las entradas hay que arreglarlo@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+                self.Plan_entry = ctk.CTkEntry(frame)
+                self.Plan_entry.grid(row=2, column=3)
+
+                self.label_Fecha = ctk.CTkLabel(frame, text="Fecha inicio:")
+                self.label_Fecha.grid(row=3, column=0)
+                self.Fecha_entry = ctk.CTkEntry(frame)
+                self.Fecha_entry.grid(row=3, column=1)
+
+                self.label_Vencimiento = ctk.CTkLabel(frame, text="Vencimiento:")
+                self.label_Vencimiento.grid(row=3, column=2)
+                self.Vencimiento_entry = ctk.CTkEntry(frame)
+                self.Vencimiento_entry.grid(row=3, column=3)
+
+                # Crear botones
+                self.btn_actualizar = ctk.CTkButton(frame, text="Actualizar", command=self.actualizar)
+                self.btn_actualizar.grid(row=4, column=2)
+
+                # Crear una lista para mostrar los datos de la base de datos
+                self.lista_programas = tk.Listbox(frame)
+                self.lista_programas.grid(row=5, column=0, columnspan=4, sticky=tk.W + tk.E + tk.N + tk.S)
+                self.mostrar_programas()
+
+                # Asignar una función para manejar la selección en la lista
+                self.lista_programas.bind('<<ListboxSelect>>', self.seleccionar_programa)
+
+            def mostrar_programas(self):
+                self.lista_programas.delete(0, ctk.END)
+                
+                cuotas = self.cursor.execute('SELECT * FROM Cuotas').fetchall()
+
+                for cuota in cuotas:
+                    id_cliente, haber, plan, profe, fecha, vencimiento, id_cliente2, id_programa = cuota  # Obtener los dos últimos elementos de la tupla
+                    consulta = """SELECT * FROM Clientes WHERE id = ?;"""
+                    cursor.execute(consulta, (id_cliente,)) 
+                    cliente = cursor.fetchone()  
+                    _, nombre, apellido, correo, documento, fechaNacimiento, telefono = cliente
+                    self.lista_programas.insert(ctk.END, (apellido, nombre, haber, plan, fecha, vencimiento))
+
+            def actualizar(self):
+                apellido = self.Apellido_entry.get()
+                nombre = self.nombre_entry.get()
+                deuda = self.Deuda_entry.get()
+                fecha = self.Fecha_entry.get()
+                vencimiento = self.Vencimiento_entry.get()
+                plan = self.Plan_entry.get()
+
+                consulta = """SELECT * FROM Clientes WHERE Apellido = ? AND Nombre = ?;"""
+                cursor.execute(consulta, (apellido, nombre))
+                cliente = cursor.fetchone()
+
+
+                if apellido and nombre and deuda and fecha and vencimiento and plan:
+
+                    self.cursor.execute("UPDATE Cuotas SET Haber=?, PLAN=?, Fecha=?, Vencimiento=? WHERE id=?",
+                                        (deuda,plan, fecha, vencimiento, cliente[0]))
+                    self.conexion.commit()
+                    self.mostrar_programas()
+                    self.limpiar_campos()
+
+            def seleccionar_programa(self, event):
+                programa = self.lista_programas.get(self.lista_programas.curselection())
+                nombre, apellido, haber, plan, fecha, vencimiento = programa
+                self.Deuda_entry.delete(0, ctk.END)
+                self.Deuda_entry.insert(0, haber)
+                self.Plan_entry.delete(0, ctk.END)
+                self.Plan_entry.insert(0, plan)
+                self.Fecha_entry.delete(0, ctk.END)
+                self.Fecha_entry.insert(0, fecha)
+                self.Vencimiento_entry.delete(0, tk.END)
+                self.Vencimiento_entry.insert(0, vencimiento)
+                self.nombre_entry.delete(0, ctk.END)
+                self.nombre_entry.insert(0, nombre)
+                self.Apellido_entry.delete(0, ctk.END)
+                self.Apellido_entry.insert(0, apellido)
+
+            def limpiar_campos(self):
+                self.Apellido_entry.delete(0, ctk.END)
+                self.nombre_entry.delete(0, ctk.END)
+                self.Deuda_entry.delete(0, ctk.END)
+                self.Fecha_entry.delete(0, ctk.END)
+                self.Vencimiento_entry.delete(0, ctk.END)
+                self.Plan_entry.delete(0, ctk.END)
+
+            def __del__(self):
+                self.conexion.close()
+
+        frame=customtkinter.CTkFrame(self.frame_consultarCuotas, width=1000, height=800, corner_radius=15)
+        frame.pack(pady=10)
+
+        # Cargar una imagen para volver atras
+        imagen = ctk.CTkImage(light_image=PIL.Image.open("./assets/volver.png"),
+                                dark_image=PIL.Image.open("./assets/volver.png"),
+                                size=(30, 30))
+        
+        boton_con_imagen = ctk.CTkButton(self.frame_consultarCuotas, image=imagen,text="Volver", command=lambda:(self.frame_clientes.pack(pady=60),self.frame_consultarCuotas.pack_forget()))
+        boton_con_imagen.pack(pady=10)
+
+        ProgramaABM_cuotas(frame)
+
+
 
 # Llenar el menu actualizar cliente
         class ProgramaABM_Clientes:
@@ -308,9 +441,6 @@ class VentanaPrincipal(tk.Tk):
                 self.Telefono_entry.grid(row=3, column=3)
 
                 # Crear botones
-                self.btn_agregar = ctk.CTkButton(frame, text="Agregar", command=self.agregar)
-                self.btn_agregar.grid(row=4, column=0)
-
                 self.btn_actualizar = ctk.CTkButton(frame, text="Actualizar", command=self.actualizar)
                 self.btn_actualizar.grid(row=4, column=2)
 
@@ -330,23 +460,6 @@ class VentanaPrincipal(tk.Tk):
                 for programa in programas:
                     _, nombre, apellido, correo, documento, fechaNacimiento, telefono = programa  # Obtener los dos últimos elementos de la tupla
                     self.lista_programas.insert(ctk.END, (apellido, nombre, correo, documento, fechaNacimiento, telefono))
-
-
-            def agregar(self):
-                apellido = self.Apellido_entry.get()
-                nombre = self.nombre_entry.get()
-                correo = self.Correo_entry.get()
-                documento = self.Documento_entry.get()
-                fechaNacimiento = self.FechaNacimiento_entry.get()
-                telefono = self.Telefono_entry.get()
-
-                if apellido and nombre and correo and documento and fechaNacimiento and telefono:
-                    self.cursor.execute("INSERT INTO Clientes (Apellido, Nombre, Correo, Documento, Fecha_Nacimiento, Telefono) VALUES (?, ?, ?, ?, ?, ?)",
-                                        (apellido, nombre, correo, documento, fechaNacimiento, telefono))
-                    self.conexion.commit()
-                    self.mostrar_programas()
-                    self.limpiar_campos()
-
 
             def actualizar(self):
                 apellido = self.Apellido_entry.get()
@@ -392,7 +505,7 @@ class VentanaPrincipal(tk.Tk):
             def __del__(self):
                 self.conexion.close()
 
-        frame=customtkinter.CTkFrame(self.frame_actualizarClientes, width=800, height=600, corner_radius=15)
+        frame=customtkinter.CTkFrame(self.frame_actualizarClientes, width=1000, height=800, corner_radius=15)
         frame.pack(pady=10)
 
         # Cargar una imagen para volver atras
@@ -400,7 +513,7 @@ class VentanaPrincipal(tk.Tk):
                                 dark_image=PIL.Image.open("./assets/volver.png"),
                                 size=(30, 30))
         
-        boton_con_imagen = ctk.CTkButton(master=self.frame_actualizarClientes, image=imagen,text="Volver", command=lambda:(self.frame_clientes.pack(),self.frame_actualizarClientes.pack_forget()))
+        boton_con_imagen = ctk.CTkButton(master=self.frame_actualizarClientes, image=imagen,text="Volver", command=lambda:(self.frame_clientes.pack(pady=60),self.frame_actualizarClientes.pack_forget()))
         boton_con_imagen.pack(pady=10)
 
         ProgramaABM_Clientes(frame)
@@ -482,7 +595,7 @@ class VentanaPrincipal(tk.Tk):
             def __del__(self):
                 self.conexion.close()
 
-        frame=customtkinter.CTkFrame(self.frame_actualizarPrecio, width=800, height=600, corner_radius=15)
+        frame=customtkinter.CTkFrame(self.frame_actualizarPrecio, width=800, height=600)
         frame.pack(pady=10)
 
         # Cargar una imagen para volver atras
@@ -490,15 +603,14 @@ class VentanaPrincipal(tk.Tk):
                                 dark_image=PIL.Image.open("./assets/volver.png"),
                                 size=(30, 30))
         
-        boton_con_imagen = ctk.CTkButton(master=self.frame_actualizarPrecio, image=imagen,text="Volver", command=lambda:(self.frame_pagos.pack(),self.frame_actualizarPrecio.pack_forget()))
+        boton_con_imagen = ctk.CTkButton(master=self.frame_actualizarPrecio, image=imagen,text="Volver", command=lambda:(self.frame_pagos.pack(pady=60),self.frame_actualizarPrecio.pack_forget()))
         boton_con_imagen.pack(pady=10)
 
         ProgramaABM(frame)
 
 
-
         # Mostrar el primer menú al inicio
-        self.frame_menu.pack()
+        self.frame_menu.pack(pady=70)
 
 if __name__ == "__main__":
     app = VentanaPrincipal()

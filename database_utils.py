@@ -8,6 +8,7 @@ import pygame
 import sqlite3
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
+from tkinter import messagebox
 
 # Obtener la fecha actual
 fecha_actual = datetime.now()
@@ -27,11 +28,14 @@ Args:
 return:
     registrar: registra la asistencia el la tabla de asistencia con una fecha 
 """
-def registrarAsistencia(id):
+def registrarAsistencia(datos):
+    id_cliente,apellido,nombre, documento, correo, fecha_nacimiento, telefono, id_cuota, deuda, plan, profesor, fecha, vencimiento, id_cliente2, id_cuota = datos
+    mensaje = f"Registro de Asistencia:\n\nNombre: {nombre}\nApellido: {apellido}\nVencimiento: {vencimiento}\nPlan: {plan}"
+    messagebox.showinfo("Asistencia Registrada", mensaje)
     conn = sqlite3.connect("BaseDatos.db")
     cursor = conn.cursor()
     cursor.execute("INSERT INTO Asistencia (Cliente, Fecha) VALUES (?, ?)",
-                        (id, actual))
+                        (id_cliente, actual))
     conn.commit()
     conn.close()
 
@@ -58,6 +62,8 @@ def agregar_cliente(cliente_data):
                         (apellido, nombre, documento, correo, fecha_nacimiento, telefono))
             # Confirmar la transacción
             conn.commit()
+            mensaje = f"Registro de Cliente:\n\nNombre: {nombre}\nApellido: {apellido}\nDocumento: {documento}\nCorreo: {correo}\nNacimiento: {fecha_nacimiento}\nTelefono: {telefono}"
+            messagebox.showinfo("Cliente Registrado", mensaje)
         except sqlite3.Error as e:
             conn.rollback()
         finally:
@@ -109,7 +115,7 @@ def registrarPago(data):
         fecha_vencimiento = datetime.strptime(datos_cuota[5], "%d/%m/%Y")
 
     # Verificar que ningún dato esté vacío
-    if id and Haber and Plan and Profesor:
+    if id_cliente and Haber and Plan and Profesor:
         #variable que verifica si es el primer pago que hace
         if datos_cuota == None:
             try:
@@ -140,6 +146,10 @@ def registrarPago(data):
             cursor.execute("UPDATE Cuotas SET Haber = ?, PLAN = ?, PROFESOR = ?,  id_programa = ? WHERE id_cliente = ?",
                         (Haber, Plan, Profesor, id_programa, id_cliente))
             conexion.commit()
+
+        mensaje = f"Registro de Cobro:\n\nNombre: {datos_cliente[1]}\nApellido: {datos_cliente[2]}\nDocumento: {documento}\nCobro: {cobro}\nProfesor: {Profesor}\nFecha: {actual}"
+        messagebox.showinfo("Cobro Registrado", mensaje)
+
         registrarCobro(id_cliente, cobro, Profesor)
 
 """ en esta funcion registrara un cliente nuevo
