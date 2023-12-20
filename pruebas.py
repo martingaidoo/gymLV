@@ -14,6 +14,7 @@ from tkinter import messagebox
 import keyboard
 from datetime import datetime
 from database_utils import *
+from informes import *
 
 import os
 import sys
@@ -98,6 +99,9 @@ class VentanaPrincipal(tk.Tk):
 
         button_consultarCliente = customtkinter.CTkButton(self.frame_clientes, width=220, text="CONSULTAR CUOTAS", command=lambda: (self.frame_consultarCuotas.pack(pady=60),self.frame_clientes.pack_forget()), corner_radius=6)
         button_consultarCliente.place(x=50, y=220)
+
+        button_generarexel = customtkinter.CTkButton(self.frame_clientes, width=220, text="GENERAR EXCEL CLIENTES", command=lambda: (generar_completo()), corner_radius=6)
+        button_generarexel.place(x=50, y=275)
 
         
 
